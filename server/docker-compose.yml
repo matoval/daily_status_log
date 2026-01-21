@@ -2,10 +2,10 @@ services:
   server:
     build: .
     ports:
-      - "8080:8080"
+      - "21435:21435"
     environment:
       - DATABASE_URL=postgres://postgres:postgres@db:5432/daily_status_log
-      - PORT=8080
+      - PORT=21435
       - RUST_LOG=daily_status_log_server=info,tower_http=info
     depends_on:
       db:
