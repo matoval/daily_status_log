@@ -183,7 +183,6 @@ Guidelines:
 - [ ] Remote sync server
 - [ ] macOS build
 - [ ] Multi-device sync
-- [ ] Team features (optional)
 
 ## File Structure
 
