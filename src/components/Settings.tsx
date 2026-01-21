@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Settings as SettingsType, getSettings, updateSettings } from "../lib/tauri";
+import { Settings as SettingsType, getSettings, updateSettings, testSyncConnection } from "../lib/tauri";
 import { checkOllamaStatus, OllamaStatus } from "../lib/ollama";
 
 interface SettingsProps {
@@ -12,6 +12,8 @@ export function Settings({ onClose }: SettingsProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [syncTestResult, setSyncTestResult] = useState<"success" | "failed" | null>(null);
+  const [isTesting, setIsTesting] = useState(false);
 
   useEffect(() => {
     loadSettings();
@@ -53,6 +55,22 @@ export function Settings({ onClose }: SettingsProps) {
       console.error(err);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleTestConnection = async () => {
+    if (!settings?.sync_url || !settings?.sync_api_key) return;
+
+    setIsTesting(true);
+    setSyncTestResult(null);
+    try {
+      const success = await testSyncConnection(settings.sync_url, settings.sync_api_key);
+      setSyncTestResult(success ? "success" : "failed");
+    } catch (err) {
+      setSyncTestResult("failed");
+      console.error(err);
+    } finally {
+      setIsTesting(false);
     }
   };
 
@@ -206,6 +224,70 @@ export function Settings({ onClose }: SettingsProps) {
               />
             )}
             <p className="form-hint">Model used for AI Chat feature</p>
+          </div>
+
+          <div className="settings-divider" />
+
+          <h3>Remote Sync</h3>
+
+          <div className="form-group">
+            <label className="checkbox-label">
+              <input
+                id="sync-enabled"
+                type="checkbox"
+                checked={settings.sync_enabled}
+                onChange={(e) =>
+                  setSettings({ ...settings, sync_enabled: e.target.checked })
+                }
+              />
+              Enable remote sync
+            </label>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="sync-url">Server URL</label>
+            <input
+              id="sync-url"
+              type="text"
+              value={settings.sync_url}
+              onChange={(e) =>
+                setSettings({ ...settings, sync_url: e.target.value })
+              }
+              placeholder="https://your-server.com"
+              disabled={!settings.sync_enabled}
+            />
+            <p className="form-hint">URL of your sync server</p>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="sync-api-key">API Key</label>
+            <input
+              id="sync-api-key"
+              type="password"
+              value={settings.sync_api_key}
+              onChange={(e) =>
+                setSettings({ ...settings, sync_api_key: e.target.value })
+              }
+              placeholder="Your API key (min 16 characters)"
+              disabled={!settings.sync_enabled}
+            />
+            <p className="form-hint">Used to authenticate with your sync server</p>
+          </div>
+
+          <div className="form-group">
+            <button
+              type="button"
+              onClick={handleTestConnection}
+              disabled={!settings.sync_enabled || !settings.sync_url || !settings.sync_api_key || isTesting}
+            >
+              {isTesting ? "Testing..." : "Test Connection"}
+            </button>
+            {syncTestResult === "success" && (
+              <span className="test-result success">Connection successful</span>
+            )}
+            {syncTestResult === "failed" && (
+              <span className="test-result failed">Connection failed</span>
+            )}
           </div>
         </div>
 

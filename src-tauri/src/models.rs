@@ -35,6 +35,9 @@ pub struct Settings {
     pub standup_format: String,
     pub ai_enabled: bool,
     pub ollama_model: String,
+    pub sync_enabled: bool,
+    pub sync_url: String,
+    pub sync_api_key: String,
 }
 
 impl Default for Settings {
@@ -45,6 +48,9 @@ impl Default for Settings {
             standup_format: "markdown".to_string(),
             ai_enabled: false,
             ollama_model: "qwen2.5:1.5b".to_string(),
+            sync_enabled: false,
+            sync_url: String::new(),
+            sync_api_key: String::new(),
         }
     }
 }

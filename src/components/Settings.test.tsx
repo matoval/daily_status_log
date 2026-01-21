@@ -166,6 +166,9 @@ describe("Settings", () => {
           standup_format: "slack",
           ai_enabled: false,
           ollama_model: "qwen2.5:1.5b",
+          sync_enabled: false,
+          sync_url: "",
+          sync_api_key: "",
         },
       });
     });

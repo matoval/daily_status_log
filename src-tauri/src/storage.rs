@@ -205,6 +205,9 @@ impl Database {
                 "standup_format" => settings.standup_format = value,
                 "ai_enabled" => settings.ai_enabled = value == "true",
                 "ollama_model" => settings.ollama_model = value,
+                "sync_enabled" => settings.sync_enabled = value == "true",
+                "sync_url" => settings.sync_url = value,
+                "sync_api_key" => settings.sync_api_key = value,
                 _ => {}
             }
         }
@@ -235,8 +238,71 @@ impl Database {
             "INSERT OR REPLACE INTO settings (key, value) VALUES ('ollama_model', ?1)",
             params![settings.ollama_model],
         )?;
+        conn.execute(
+            "INSERT OR REPLACE INTO settings (key, value) VALUES ('sync_enabled', ?1)",
+            params![settings.sync_enabled.to_string()],
+        )?;
+        conn.execute(
+            "INSERT OR REPLACE INTO settings (key, value) VALUES ('sync_url', ?1)",
+            params![settings.sync_url],
+        )?;
+        conn.execute(
+            "INSERT OR REPLACE INTO settings (key, value) VALUES ('sync_api_key', ?1)",
+            params![settings.sync_api_key],
+        )?;
 
         Ok(())
+    }
+
+    pub fn upsert_entry(&self, entry: &Entry) -> Result<()> {
+        let conn = self.conn.lock().unwrap();
+        let tasks_json = serde_json::to_string(&entry.tasks).unwrap_or_default();
+
+        conn.execute(
+            "INSERT OR REPLACE INTO entries (id, created_at, date, content, tasks, blockers, synced_at)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+            params![
+                entry.id,
+                entry.created_at.to_rfc3339(),
+                entry.date.to_string(),
+                entry.content,
+                tasks_json,
+                entry.blockers,
+                entry.synced_at.map(|dt| dt.to_rfc3339()),
+            ],
+        )?;
+        Ok(())
+    }
+
+    pub fn update_entry_synced_at(&self, id: &str, synced_at: DateTime<Utc>) -> Result<()> {
+        let conn = self.conn.lock().unwrap();
+        conn.execute(
+            "UPDATE entries SET synced_at = ?1 WHERE id = ?2",
+            params![synced_at.to_rfc3339(), id],
+        )?;
+        Ok(())
+    }
+
+    pub fn get_unsynced_entries(&self) -> Result<Vec<Entry>> {
+        let conn = self.conn.lock().unwrap();
+        let mut entries = Vec::new();
+
+        let mut stmt = conn.prepare(
+            "SELECT id, created_at, date, content, tasks, blockers, synced_at
+             FROM entries WHERE synced_at IS NULL ORDER BY created_at ASC"
+        )?;
+
+        let rows = stmt.query_map([], |row| Ok(Self::row_to_entry(row)))?;
+
+        for row in rows {
+            entries.push(row?);
+        }
+
+        Ok(entries)
+    }
+
+    pub fn get_all_entries(&self) -> Result<Vec<Entry>> {
+        self.get_entries(None, None)
     }
 
     fn row_to_entry(row: &rusqlite::Row) -> Entry {

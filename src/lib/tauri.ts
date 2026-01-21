@@ -22,6 +22,9 @@ export interface Settings {
   standup_format: string;
   ai_enabled: boolean;
   ollama_model: string;
+  sync_enabled: boolean;
+  sync_url: string;
+  sync_api_key: string;
 }
 
 export interface StandupReport {
@@ -80,4 +83,18 @@ export async function updateSettings(settings: Settings): Promise<void> {
 
 export async function copyToClipboard(text: string): Promise<void> {
   return writeText(text);
+}
+
+export interface SyncResult {
+  uploaded: number;
+  downloaded: number;
+  errors: string[];
+}
+
+export async function syncEntries(): Promise<SyncResult> {
+  return invoke("sync_entries");
+}
+
+export async function testSyncConnection(url: string, apiKey: string): Promise<boolean> {
+  return invoke("test_sync_connection", { url, apiKey });
 }

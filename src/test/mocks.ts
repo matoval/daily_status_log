@@ -37,6 +37,9 @@ export const mockSettings: Settings = {
   standup_format: "markdown",
   ai_enabled: false,
   ollama_model: "qwen2.5:1.5b",
+  sync_enabled: false,
+  sync_url: "",
+  sync_api_key: "",
 };
 
 export const mockStandupReport: StandupReport = {
@@ -81,6 +84,10 @@ export function setupTauriMocks() {
         return Promise.resolve({ available: false, models: [] });
       case "chat_with_ai":
         return Promise.resolve("This is a mock AI response.");
+      case "sync_entries":
+        return Promise.resolve({ uploaded: 0, downloaded: 0, errors: [] });
+      case "test_sync_connection":
+        return Promise.resolve(true);
       default:
         return Promise.reject(new Error(`Unknown command: ${cmd}`));
     }

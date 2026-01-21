@@ -354,3 +354,14 @@ pub async fn chat_with_ai(
 
     ollama::chat_with_entries(&message, &entries, &model).await
 }
+
+#[tauri::command]
+pub async fn sync_entries(db: State<'_, Database>) -> Result<crate::sync::SyncResult, String> {
+    let settings = db.get_settings().map_err(|e| e.to_string())?;
+    crate::sync::sync_entries(&db, &settings).await
+}
+
+#[tauri::command]
+pub async fn test_sync_connection(url: String, api_key: String) -> Result<bool, String> {
+    crate::sync::test_connection(&url, &api_key).await
+}

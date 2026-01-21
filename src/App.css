@@ -466,6 +466,60 @@
 .header-actions {
   display: flex;
   gap: 0.5rem;
+  align-items: center;
+}
+
+.sync-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: 1px solid #059669;
+  background: #059669;
+  color: white;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.sync-btn:hover:not(:disabled) {
+  background: #047857;
+}
+
+.sync-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.sync-status {
+  font-size: 0.85rem;
+  color: #059669;
+  padding: 0.25rem 0.5rem;
+  background: #d1fae5;
+  border-radius: 4px;
+}
+
+.test-result {
+  margin-left: 0.5rem;
+  font-size: 0.85rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.test-result.success {
+  color: #059669;
+  background: #d1fae5;
+}
+
+.test-result.failed {
+  color: #dc2626;
+  background: #fecaca;
+}
+
+.settings-form input[type="text"],
+.settings-form input[type="password"] {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
 }
 
 .chat-btn {
@@ -842,5 +896,31 @@
 
   .form-hint {
     color: #9ca3af;
+  }
+
+  .sync-status {
+    background: #064e3b;
+    color: #6ee7b7;
+  }
+
+  .test-result.success {
+    background: #064e3b;
+    color: #6ee7b7;
+  }
+
+  .test-result.failed {
+    background: #450a0a;
+    color: #fca5a5;
+  }
+
+  .settings-form input[type="text"],
+  .settings-form input[type="password"] {
+    background: #333;
+    border-color: #444;
+    color: #f6f6f6;
+  }
+
+  .settings-form input:disabled {
+    background: #2a2a2a;
   }
 }

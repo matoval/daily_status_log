@@ -4,6 +4,7 @@ mod models;
 mod ollama;
 mod scheduler;
 mod storage;
+mod sync;
 
 use scheduler::Scheduler;
 use storage::Database;
@@ -93,6 +94,8 @@ pub fn run() {
             commands::search_entries,
             commands::check_ollama_status,
             commands::chat_with_ai,
+            commands::sync_entries,
+            commands::test_sync_connection,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
