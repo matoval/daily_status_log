@@ -170,12 +170,14 @@ Guidelines:
 - [x] Copy to clipboard functionality
 - [x] Configurable reminder time (weekdays only)
 
-### Phase 2: Enhanced Features
-- [ ] Optional AI integration (Ollama) for summaries
-- [ ] Query past entries
-- [ ] Export functionality (JSON, CSV, Markdown)
-- [ ] Configurable reminder times
-- [ ] Multiple output formats (Markdown, Slack, plain text)
+### Phase 2: Enhanced Features - COMPLETED
+- [x] AI Chat integration with bundled Ollama (qwen2.5:1.5b model)
+- [x] Ollama auto-starts with app and stops on exit (port 11435)
+- [x] Auto-pull of AI model on first run
+- [x] Query past entries via AI chat (standup reports, task search)
+- [x] Export functionality (JSON, CSV, Markdown)
+- [x] Entry search with date range and text filtering
+- [x] Multiple standup formats (Markdown, Slack, plain text)
 
 ### Phase 3: Sync & Multi-Platform
 - [ ] Remote sync server
@@ -188,6 +190,8 @@ Guidelines:
 ```
 daily-status-log/
 ├── src-tauri/              # Rust backend
+│   ├── binaries/
+│   │   └── ollama-*        # Bundled Ollama binaries (per platform)
 │   ├── src/
 │   │   ├── main.rs         # Entry point
 │   │   ├── lib.rs          # App setup, tray, window management
@@ -195,7 +199,8 @@ daily-status-log/
 │   │   ├── models.rs       # Data structures (Entry, Task, Standup, Settings)
 │   │   ├── storage.rs      # SQLite database operations
 │   │   ├── scheduler.rs    # Daily reminder scheduling
-│   │   ├── ai.rs           # Ollama integration (Phase 2)
+│   │   ├── ollama.rs       # Ollama integration (server start/stop, chat API)
+│   │   ├── export.rs       # Export functionality (JSON, CSV, Markdown)
 │   │   └── sync.rs         # Remote sync (Phase 3)
 │   ├── capabilities/
 │   │   └── default.json    # Tauri permissions
@@ -206,9 +211,15 @@ daily-status-log/
 │   │   ├── EntryForm.tsx   # Form to create entries with tasks
 │   │   ├── EntryList.tsx   # Display entries grouped by date
 │   │   ├── StandupReport.tsx # Generate & copy standup reports
-│   │   └── Settings.tsx    # App settings modal
+│   │   ├── Settings.tsx    # App settings modal
+│   │   ├── Chat.tsx        # AI chat panel
+│   │   ├── ExportModal.tsx # Export UI with format selection
+│   │   └── EntrySearch.tsx # Search/filter UI
 │   ├── lib/
-│   │   └── tauri.ts        # TypeScript wrappers for Tauri commands
+│   │   ├── tauri.ts        # TypeScript wrappers for Tauri commands
+│   │   ├── ollama.ts       # Ollama status and chat functions
+│   │   ├── export.ts       # Export functionality
+│   │   └── search.ts       # Search functionality
 │   ├── App.tsx
 │   ├── App.css
 │   └── main.tsx
@@ -223,15 +234,17 @@ daily-status-log/
 ## Dependencies
 
 ### Desktop App
-- Tauri 2.x
-- React 18+ or Vue 3+
+- Tauri 2.x with tauri-plugin-shell (for sidecar support)
+- React 18 + TypeScript
 - SQLite (via rusqlite)
-- Ollama (external dependency)
+- Ollama (bundled as sidecar binary)
 
 ### AI Requirements
-- Ollama installed on system
-- Model: llama3.2:3b or phi3:mini (user configurable)
-- RAM: 4-8GB recommended for 3B models
+- Ollama bundled with app (no separate installation needed)
+- Model: qwen2.5:1.5b (auto-pulled on first run, ~1GB)
+- Runs on CPU only for maximum compatibility
+- RAM: 2-4GB recommended for 1.5B model
+- Dedicated port 11435 to avoid conflicts
 
 ### Sync Server (Optional)
 - Rust + Axum/Actix
@@ -240,27 +253,23 @@ daily-status-log/
 
 ## Configuration
 
-```toml
-# config.toml
-[reminder]
-enabled = true
-time = "17:00"
-days = ["Mon", "Tue", "Wed", "Thu", "Fri"]
+Settings are stored in SQLite and managed via the Settings UI:
 
-[ai]
-provider = "ollama"
-model = "llama3.2:3b"
-endpoint = "http://localhost:11434"
-
-[storage]
-local_path = "~/.local/share/daily-status-log"
-sync_enabled = false
-sync_url = ""
-sync_api_key = ""
-
-[ui]
-theme = "system"
+```json
+{
+  "reminder_enabled": true,
+  "reminder_time": "17:00",
+  "standup_format": "markdown",
+  "ai_enabled": false,
+  "ollama_model": "qwen2.5:1.5b"
+}
 ```
+
+- **reminder_enabled**: Show daily reminder notifications
+- **reminder_time**: Time for reminder (HH:MM format)
+- **standup_format**: Default format for standups (markdown, plain, slack)
+- **ai_enabled**: Reserved for future use
+- **ollama_model**: AI model for chat (auto-pulled if not available)
 
 ## Security Considerations
 
