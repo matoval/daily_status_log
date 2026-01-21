@@ -138,7 +138,12 @@ function App() {
         )}
       </div>
 
-      {showSettings && <Settings onClose={() => { setShowSettings(false); loadSyncSettingsAndSync(); }} />}
+      {showSettings && (
+        <Settings
+          onClose={() => { setShowSettings(false); loadSyncSettingsAndSync(); }}
+          onSyncRequested={() => performSync(true)}
+        />
+      )}
 
       <div className="toast-container">
         {toasts.map(toast => (

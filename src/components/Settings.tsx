@@ -4,9 +4,10 @@ import { checkOllamaStatus, OllamaStatus } from "../lib/ollama";
 
 interface SettingsProps {
   onClose: () => void;
+  onSyncRequested?: () => void;
 }
 
-export function Settings({ onClose }: SettingsProps) {
+export function Settings({ onClose, onSyncRequested }: SettingsProps) {
   const [settings, setSettings] = useState<SettingsType | null>(null);
   const [ollamaStatus, setOllamaStatus] = useState<OllamaStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -50,6 +51,11 @@ export function Settings({ onClose }: SettingsProps) {
     try {
       await updateSettings(settings);
       onClose();
+
+      // Trigger sync if sync is enabled
+      if (settings.sync_enabled && settings.sync_url && settings.sync_api_key && onSyncRequested) {
+        onSyncRequested();
+      }
     } catch (err) {
       setError("Failed to save settings");
       console.error(err);
