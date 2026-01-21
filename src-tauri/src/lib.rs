@@ -97,8 +97,16 @@ pub fn run() {
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
         .run(|_app_handle, event| {
-            if let tauri::RunEvent::Exit = event {
-                ollama::stop_ollama_server();
+            match event {
+                tauri::RunEvent::Exit => {
+                    ollama::stop_ollama_server();
+                }
+                tauri::RunEvent::ExitRequested { api, .. } => {
+                    // Don't prevent exit, but ensure cleanup
+                    ollama::stop_ollama_server();
+                    let _ = api;
+                }
+                _ => {}
             }
         });
 }

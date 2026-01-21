@@ -124,15 +124,27 @@ fn ensure_model_available(app: &AppHandle, model: &str) {
 
 /// Stops the Ollama server if we started it.
 pub fn stop_ollama_server() {
+    // Reset the started flag so we can restart if needed
+    OLLAMA_STARTED.store(false, Ordering::SeqCst);
+
     if let Ok(mut guard) = OLLAMA_PROCESS.lock() {
         if let Some(child) = guard.take() {
             log::info!("Stopping Ollama server...");
             if let Err(e) = child.kill() {
-                log::warn!("Failed to stop Ollama: {}", e);
+                log::warn!("Failed to stop Ollama via handle: {}", e);
             } else {
                 log::info!("Ollama server stopped");
             }
         }
+    }
+
+    // Also try to kill any ollama processes on our port as a fallback
+    #[cfg(unix)]
+    {
+        use std::process::Command;
+        let _ = Command::new("fuser")
+            .args(["-k", "11435/tcp"])
+            .output();
     }
 }
 
