@@ -1,71 +1,122 @@
 # Daily Status Log
 
-A cross-platform desktop application for tracking daily work status and generating standup reports. Built with Tauri 2.x, React, and TypeScript.
+A cross-platform desktop application for tracking daily work status with AI-powered chat assistance and optional multi-device sync.
 
 ## Features
 
-- **Entry Management** - Log daily status updates with tasks and blockers
-- **Task Tracking** - Mark tasks as completed or in-progress
-- **Standup Reports** - Generate reports from entries since your last standup
-- **System Tray** - Runs in background, minimizes to tray
-- **Daily Reminders** - Configurable notification at your preferred time (weekdays)
-- **Copy to Clipboard** - One-click copy of standup reports
-- **Dark Mode** - Automatic system theme support
-- **Local Storage** - All data stored locally in SQLite
+- **Daily Entry Logging** - Track tasks, progress, and blockers
+- **AI Chat Assistant** - Query past entries, generate standup reports (powered by local Ollama)
+- **Standup Reports** - Generate formatted reports for standups (Markdown, Slack, plain text)
+- **Multi-Device Sync** - Optional sync to your own server
+- **Local-First** - All data stored locally by default, no cloud required
+- **System Tray** - Runs in background with configurable daily reminders
 
-## Screenshots
+## Quick Start
 
-```
-+------------------------------------------+
-|  Daily Status Log              [Settings]|
-+------------------------------------------+
-|  [+ New Entry]  [Generate Standup]       |
-+------------------------------------------+
-|  Today                                   |
-|  +------------------------------------+  |
-|  | 10:30 AM          2/3 tasks    [x] |  |
-|  +------------------------------------+  |
-|                                          |
-|  Recent                                  |
-|  Mon, Jan 20 (2 entries)                 |
-|  +------------------------------------+  |
-|  | 5:00 PM           1/2 tasks    [x] |  |
-|  +------------------------------------+  |
-+------------------------------------------+
-```
+### Download
 
-## Prerequisites
+Download the latest release for your platform:
 
-### Rust
+| Platform | Download |
+|----------|----------|
+| Linux (AppImage) | [Download](#) |
+| Linux (RPM) | [Download](#) |
+| macOS (DMG) | [Download](#) |
+
+### Linux (AppImage)
 
 ```bash
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-source ~/.cargo/env
+chmod +x Daily-Status-Log-*.AppImage
+./Daily-Status-Log-*.AppImage
 ```
 
-### System Dependencies (Fedora/RHEL)
+### Linux (RPM)
 
 ```bash
-sudo dnf install -y webkit2gtk4.1-devel openssl-devel librsvg2-devel libappindicator-gtk3-devel
+sudo rpm -i daily-status-log-*.rpm
 ```
 
-### System Dependencies (Ubuntu/Debian)
+### macOS
+
+1. Open the `.dmg` file
+2. Drag "Daily Status Log" to Applications
+3. Open from Applications (right-click → Open on first launch)
+
+## Usage
+
+### Creating Entries
+
+1. Click "New Entry" or use the entry form
+2. Add a description of what you worked on
+3. Add tasks with their completion status
+4. Optionally add blockers
+5. Click "Save Entry"
+
+### AI Chat
+
+Click "AI Chat" to open the chat panel. You can ask:
+
+- "What did I work on last week?"
+- "Generate a standup report"
+- "Find tasks related to API"
+
+The AI runs locally using Ollama (bundled with the app) - no internet required.
+
+### Standup Reports
+
+1. Open the Standup Report panel
+2. Review the generated report (includes entries since last standup)
+3. Edit if needed
+4. Click "Copy to Clipboard"
+5. Paste into Slack, Teams, or email
+
+### Settings
+
+Access Settings to configure:
+
+- **Reminder Time** - Daily notification time
+- **Standup Format** - Markdown, Slack, or plain text
+- **AI Model** - Ollama model for chat
+- **Remote Sync** - Enable multi-device sync
+
+## Multi-Device Sync (Optional)
+
+Sync your entries across devices using your own server.
+
+### Server Setup
+
+1. Clone this repository on your server
+2. Deploy with Docker:
 
 ```bash
-sudo apt install -y libwebkit2gtk-4.1-dev libssl-dev librsvg2-dev libayatana-appindicator3-dev
+cd server
+docker compose up -d
 ```
 
-### Node.js
+3. Server runs on port `21435` by default
 
-Node.js 18+ is required. Install via your package manager or [nvm](https://github.com/nvm-sh/nvm).
+### Configure Desktop App
 
-## Installation
+1. Open Settings → Remote Sync
+2. Enable "Enable remote sync"
+3. Enter your server URL (e.g., `http://192.168.1.100:21435`)
+4. Enter an API key (16+ characters, you create this)
+5. Click "Test Connection"
+6. Save Settings
+
+Sync happens automatically on app startup and after creating entries.
+
+## Building from Source
+
+### Prerequisites
+
+- Node.js 18+
+- Rust 1.70+
+- Platform-specific dependencies (see [Tauri prerequisites](https://tauri.app/start/prerequisites/))
+
+### Development
 
 ```bash
-# Clone the repository
-git clone https://github.com/matoval/daily_status_log.git
-cd daily-status-log
-
 # Install dependencies
 npm install
 
@@ -73,122 +124,30 @@ npm install
 npm run tauri dev
 ```
 
-## Building
+### Production Build
 
 ```bash
-# Build for production
+# Build for current platform
 npm run tauri build
-
-# The built application will be in:
-# src-tauri/target/release/bundle/
 ```
 
-## Usage
+Outputs are in `src-tauri/target/release/bundle/`.
 
-### Creating Entries
+## Tech Stack
 
-1. Click **+ New Entry** button
-2. Describe what you worked on
-3. Add tasks (press Enter or click Add)
-4. Mark tasks as completed if done
-5. Add any blockers (optional)
-6. Click **Save Entry**
+- **Frontend**: React 18 + TypeScript + Vite
+- **Backend**: Tauri 2 (Rust)
+- **Database**: SQLite (local), PostgreSQL (sync server)
+- **AI**: Ollama with qwen2.5:1.5b model (bundled)
+- **Sync Server**: Rust + Axum + Docker
 
-### Generating Standup Reports
+## Privacy
 
-1. Click **Generate Standup** button
-2. Review the generated report (entries since last standup)
-3. Edit if needed
-4. Click **Copy to Clipboard & Save**
-5. Paste into Slack, Teams, or your standup tool
-
-### Daily Reminders
-
-1. Open **Settings**
-2. Enable daily reminder
-3. Set your preferred reminder time
-4. The app will notify you on weekdays at that time
-
-### System Tray
-
-- Close the window to minimize to tray (app keeps running)
-- Click the tray icon to reopen the window
-- Right-click the tray icon for menu options
-- Select **Quit** to fully exit the application
-
-## Configuration
-
-Settings are stored in the app and include:
-
-| Setting | Description | Default |
-|---------|-------------|---------|
-| Reminder Enabled | Toggle daily reminders | On |
-| Reminder Time | Time for daily notification | 09:00 |
-| Standup Format | Output format for reports | Markdown |
-
-## Data Storage
-
-All data is stored locally in SQLite:
-
-- **Linux**: `~/.local/share/com.msandova.daily-status-log/`
-- **macOS**: `~/Library/Application Support/com.msandova.daily-status-log/`
-- **Windows**: `%APPDATA%\com.msandova.daily-status-log\`
-
-## Development
-
-### Project Structure
-
-```
-daily-status-log/
-├── src-tauri/           # Rust backend
-│   ├── src/
-│   │   ├── lib.rs       # App setup, tray, window management
-│   │   ├── commands.rs  # Tauri commands (API)
-│   │   ├── models.rs    # Data structures
-│   │   ├── storage.rs   # SQLite operations
-│   │   └── scheduler.rs # Daily reminder scheduling
-│   └── Cargo.toml
-├── src/                 # React frontend
-│   ├── components/      # UI components
-│   ├── lib/tauri.ts     # Tauri API wrappers
-│   ├── App.tsx
-│   └── App.css
-└── package.json
-```
-
-### Tech Stack
-
-- **Backend**: Rust + Tauri 2.x
-- **Frontend**: React 19 + TypeScript + Vite
-- **Database**: SQLite (via rusqlite)
-- **Styling**: CSS with dark mode support
-
-## Roadmap
-
-See [SPEC.md](./SPEC.md) for detailed specification.
-
-### Phase 1: MVP (Completed)
-- [x] Entry form with tasks
-- [x] SQLite storage
-- [x] System tray
-- [x] Daily reminders
-- [x] Standup report generation
-- [x] Copy to clipboard
-
-### Phase 2: Enhanced Features
-- [ ] AI integration (Ollama) for conversational logging
-- [ ] Query past entries
-- [ ] Export (JSON, CSV, Markdown)
-
-### Phase 3: Sync & Multi-Platform
-- [ ] Remote sync server
-- [ ] macOS/Windows builds
-- [ ] Multi-device sync
+- All data stored locally by default
+- AI runs locally (no cloud APIs)
+- Optional sync uses your own server
+- No telemetry or analytics
 
 ## License
 
-MIT
-
-## Contributing
-
-Contributions are welcome! Please read the contributing guidelines before submitting a pull request.
+Apache License 2.0 - see [LICENSE](LICENSE) for details.

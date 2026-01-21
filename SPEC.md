@@ -294,7 +294,7 @@ Settings are stored in SQLite and managed via the Settings UI:
 - **ai_enabled**: Reserved for future use
 - **ollama_model**: AI model for chat (auto-pulled if not available)
 - **sync_enabled**: Enable remote sync to self-hosted server
-- **sync_url**: URL of sync server (e.g., http://192.168.1.3:21435)
+- **sync_url**: URL of sync server (e.g., http://192.168.1.100:21435)
 - **sync_api_key**: API key for authentication (min 16 characters)
 
 ## Security Considerations
