@@ -7,6 +7,7 @@ use axum::{
 };
 use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
+use sha2::{Sha256, Digest};
 use sqlx::{postgres::PgPoolOptions, PgPool};
 use std::sync::Arc;
 use tower_http::cors::{Any, CorsLayer};
@@ -110,6 +111,13 @@ pub struct AppState {
 // Authentication
 // ============================================================================
 
+/// Hash an API key using SHA-256 for secure storage
+fn hash_api_key(api_key: &str) -> String {
+    let mut hasher = Sha256::new();
+    hasher.update(api_key.as_bytes());
+    hex::encode(hasher.finalize())
+}
+
 fn extract_api_key(headers: &HeaderMap) -> Option<String> {
     headers
         .get("x-api-key")
@@ -142,6 +150,8 @@ async fn get_entries(
         return Err((StatusCode::UNAUTHORIZED, "Invalid API key".to_string()));
     }
 
+    let api_key_hash = hash_api_key(&api_key);
+
     let entries: Vec<(String, DateTime<Utc>, NaiveDate, String, serde_json::Value, Option<String>, DateTime<Utc>)> =
         if let Some(since) = query.since {
             sqlx::query_as(
@@ -152,7 +162,7 @@ async fn get_entries(
                 ORDER BY created_at DESC
                 "#,
             )
-            .bind(&api_key)
+            .bind(&api_key_hash)
             .bind(since)
             .fetch_all(&state.pool)
             .await
@@ -165,7 +175,7 @@ async fn get_entries(
                 ORDER BY created_at DESC
                 "#,
             )
-            .bind(&api_key)
+            .bind(&api_key_hash)
             .fetch_all(&state.pool)
             .await
         }
@@ -202,6 +212,8 @@ async fn create_entry(
         return Err((StatusCode::UNAUTHORIZED, "Invalid API key".to_string()));
     }
 
+    let api_key_hash = hash_api_key(&api_key);
+
     let tasks_json = serde_json::to_value(&entry.tasks)
         .map_err(|e| (StatusCode::BAD_REQUEST, e.to_string()))?;
 
@@ -226,7 +238,7 @@ async fn create_entry(
     .bind(&tasks_json)
     .bind(&entry.blockers)
     .bind(synced_at)
-    .bind(&api_key)
+    .bind(&api_key_hash)
     .execute(&state.pool)
     .await
     .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
@@ -249,13 +261,15 @@ async fn delete_entry(
         return Err((StatusCode::UNAUTHORIZED, "Invalid API key".to_string()));
     }
 
+    let api_key_hash = hash_api_key(&api_key);
+
     let result = sqlx::query(
         r#"
         DELETE FROM entries WHERE id = $1 AND api_key = $2
         "#,
     )
     .bind(&id)
-    .bind(&api_key)
+    .bind(&api_key_hash)
     .execute(&state.pool)
     .await
     .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
@@ -279,6 +293,7 @@ async fn upload_entries(
         return Err((StatusCode::UNAUTHORIZED, "Invalid API key".to_string()));
     }
 
+    let api_key_hash = hash_api_key(&api_key);
     let synced_at = Utc::now();
 
     for entry in entries {
@@ -303,7 +318,7 @@ async fn upload_entries(
         .bind(&tasks_json)
         .bind(&entry.blockers)
         .bind(synced_at)
-        .bind(&api_key)
+        .bind(&api_key_hash)
         .execute(&state.pool)
         .await
         .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;

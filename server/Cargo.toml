@@ -16,3 +16,5 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 dotenvy = "0.15"
 home = "=0.5.9"
+sha2 = "0.10"
+hex = "0.4"

@@ -923,21 +923,6 @@
   .settings-form input:disabled {
     background: #2a2a2a;
   }
-
-  .toast {
-    background: #333;
-    color: #f6f6f6;
-  }
-
-  .toast-success {
-    background: #064e3b;
-    border-color: #10b981;
-  }
-
-  .toast-error {
-    background: #450a0a;
-    border-color: #ef4444;
-  }
 }
 
 /* Toast notifications */
@@ -958,9 +943,37 @@
   padding: 0.75rem 1rem;
   border-radius: 8px;
   background: #fff;
+  color: #1f2937;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   border-left: 4px solid #6b7280;
   animation: slideIn 0.2s ease-out;
+}
+
+@media (prefers-color-scheme: dark) {
+  .toast {
+    background: #333;
+    color: #f6f6f6;
+  }
+
+  .toast-success {
+    background: #064e3b;
+  }
+
+  .toast-error {
+    background: #450a0a;
+  }
+
+  .toast-info {
+    background: #1e3a5f;
+  }
+
+  .toast-close {
+    color: #9ca3af;
+  }
+
+  .toast-close:hover {
+    color: #f6f6f6;
+  }
 }
 
 @keyframes slideIn {
