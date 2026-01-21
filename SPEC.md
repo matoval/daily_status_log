@@ -179,12 +179,12 @@ Guidelines:
 - [x] Entry search with date range and text filtering
 - [x] Multiple standup formats (Markdown, Slack, plain text)
 
-### Phase 3: Sync & Multi-Platform - IN PROGRESS
+### Phase 3: Sync & Multi-Platform - COMPLETED
 - [x] Remote sync server (Rust + Axum + PostgreSQL)
 - [x] Docker deployment (Dockerfile + docker-compose.yml)
 - [x] Multi-device sync with automatic sync on startup and entry creation
 - [x] Toast notifications for sync status
-- [ ] macOS build
+- [x] macOS build (universal binary for Intel and Apple Silicon)
 
 ## File Structure
 
