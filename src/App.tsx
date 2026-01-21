@@ -1,10 +1,17 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import "./App.css";
 import { EntryForm } from "./components/EntryForm";
 import { EntryList } from "./components/EntryList";
 import { Settings } from "./components/Settings";
 import { Chat } from "./components/Chat";
+import { Toast } from "./components/Toast";
 import { getEntries, getSettings, syncEntries, Entry, SyncResult } from "./lib/tauri";
+
+interface ToastMessage {
+  id: number;
+  message: string;
+  type: "success" | "error" | "info";
+}
 
 function App() {
   const [entries, setEntries] = useState<Entry[]>([]);
@@ -12,8 +19,18 @@ function App() {
   const [showChat, setShowChat] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [syncEnabled, setSyncEnabled] = useState(false);
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [syncStatus, setSyncStatus] = useState<string | null>(null);
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const toastIdRef = useRef(0);
+  const hasSyncedOnStartup = useRef(false);
+
+  const showToast = useCallback((message: string, type: "success" | "error" | "info" = "info") => {
+    const id = ++toastIdRef.current;
+    setToasts(prev => [...prev, { id, message, type }]);
+  }, []);
+
+  const removeToast = useCallback((id: number) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  }, []);
 
   const loadEntries = useCallback(async () => {
     try {
@@ -26,60 +43,67 @@ function App() {
     }
   }, []);
 
-  const loadSyncSettings = useCallback(async () => {
+  const performSync = useCallback(async (showNoChanges = false): Promise<void> => {
+    try {
+      const result: SyncResult = await syncEntries();
+
+      if (result.uploaded > 0 || result.downloaded > 0) {
+        const messages = [];
+        if (result.uploaded > 0) messages.push(`${result.uploaded} uploaded`);
+        if (result.downloaded > 0) messages.push(`${result.downloaded} downloaded`);
+        showToast(`Synced: ${messages.join(", ")}`, "success");
+
+        if (result.downloaded > 0) {
+          loadEntries();
+        }
+      } else if (showNoChanges) {
+        showToast("Already in sync", "info");
+      }
+
+      if (result.errors.length > 0) {
+        showToast(`Sync errors: ${result.errors.length}`, "error");
+      }
+    } catch (error) {
+      console.error("Sync failed:", error);
+      showToast("Sync failed", "error");
+    }
+  }, [showToast, loadEntries]);
+
+  const loadSyncSettingsAndSync = useCallback(async () => {
     try {
       const settings = await getSettings();
-      setSyncEnabled(settings.sync_enabled && !!settings.sync_url && !!settings.sync_api_key);
+      const enabled = settings.sync_enabled && !!settings.sync_url && !!settings.sync_api_key;
+      setSyncEnabled(enabled);
+
+      // Auto sync on startup if enabled
+      if (enabled && !hasSyncedOnStartup.current) {
+        hasSyncedOnStartup.current = true;
+        performSync(false);
+      }
     } catch (error) {
       console.error("Failed to load sync settings:", error);
     }
-  }, []);
+  }, [performSync]);
 
-  const handleSync = async () => {
-    setIsSyncing(true);
-    setSyncStatus(null);
-    try {
-      const result: SyncResult = await syncEntries();
-      const messages = [];
-      if (result.uploaded > 0) messages.push(`${result.uploaded} uploaded`);
-      if (result.downloaded > 0) messages.push(`${result.downloaded} downloaded`);
-      if (result.errors.length > 0) messages.push(`${result.errors.length} errors`);
-      setSyncStatus(messages.length > 0 ? messages.join(", ") : "Already in sync");
-      if (result.downloaded > 0) {
-        loadEntries();
-      }
-      setTimeout(() => setSyncStatus(null), 3000);
-    } catch (error) {
-      setSyncStatus("Sync failed");
-      console.error("Sync failed:", error);
-      setTimeout(() => setSyncStatus(null), 3000);
-    } finally {
-      setIsSyncing(false);
+  const handleEntryCreated = useCallback(async () => {
+    await loadEntries();
+
+    // Auto sync after creating an entry
+    if (syncEnabled) {
+      performSync(false);
     }
-  };
+  }, [loadEntries, syncEnabled, performSync]);
 
   useEffect(() => {
     loadEntries();
-    loadSyncSettings();
-  }, [loadEntries, loadSyncSettings]);
+    loadSyncSettingsAndSync();
+  }, [loadEntries, loadSyncSettingsAndSync]);
 
   return (
     <main className="app">
       <header className="app-header">
         <h1>Daily Status Log</h1>
         <div className="header-actions">
-          {syncEnabled && (
-            <>
-              <button
-                className="sync-btn"
-                onClick={handleSync}
-                disabled={isSyncing}
-              >
-                {isSyncing ? "Syncing..." : "Sync"}
-              </button>
-              {syncStatus && <span className="sync-status">{syncStatus}</span>}
-            </>
-          )}
           <button
             className={`chat-btn ${showChat ? "active" : ""}`}
             onClick={() => setShowChat(!showChat)}
@@ -95,7 +119,7 @@ function App() {
       <div className="app-layout">
         <div className={`app-main ${showChat ? "with-chat" : ""}`}>
           <div className="app-actions">
-            <EntryForm onEntryCreated={loadEntries} />
+            <EntryForm onEntryCreated={handleEntryCreated} />
           </div>
 
           <div className="app-content">
@@ -114,7 +138,18 @@ function App() {
         )}
       </div>
 
-      {showSettings && <Settings onClose={() => { setShowSettings(false); loadSyncSettings(); }} />}
+      {showSettings && <Settings onClose={() => { setShowSettings(false); loadSyncSettingsAndSync(); }} />}
+
+      <div className="toast-container">
+        {toasts.map(toast => (
+          <Toast
+            key={toast.id}
+            message={toast.message}
+            type={toast.type}
+            onClose={() => removeToast(toast.id)}
+          />
+        ))}
+      </div>
     </main>
   );
 }
