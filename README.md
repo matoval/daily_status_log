@@ -15,29 +15,25 @@ A cross-platform desktop application for tracking daily work status with AI-powe
 
 ### Download
 
-Download the latest release for your platform:
-
 | Platform | Download |
 |----------|----------|
-| Linux (AppImage) | [Download](#) |
-| Linux (RPM) | [Download](#) |
-| macOS (DMG) | [Download](#) |
+| Linux (deb) | [Daily.Status.Log_0.1.0_amd64.deb](https://github.com/matoval/daily_status_log/releases/download/v0.1.0/Daily.Status.Log_0.1.0_amd64.deb) |
+| Linux (RPM) | [Daily.Status.Log-0.1.0-1.x86_64.rpm](https://github.com/matoval/daily_status_log/releases/download/v0.1.0/Daily.Status.Log-0.1.0-1.x86_64.rpm) |
+| macOS (Apple Silicon) | [Daily.Status.Log_0.1.0_aarch64.dmg](https://github.com/matoval/daily_status_log/releases/download/v0.1.0/Daily.Status.Log_0.1.0_aarch64.dmg) |
 
-### Linux (AppImage)
+### Install
 
+**Linux (deb - Debian/Ubuntu):**
 ```bash
-chmod +x Daily-Status-Log-*.AppImage
-./Daily-Status-Log-*.AppImage
+sudo dpkg -i Daily.Status.Log_0.1.0_amd64.deb
 ```
 
-### Linux (RPM)
-
+**Linux (RPM - Fedora/RHEL):**
 ```bash
-sudo rpm -i daily-status-log-*.rpm
+sudo rpm -i Daily.Status.Log-0.1.0-1.x86_64.rpm
 ```
 
-### macOS
-
+**macOS:**
 1. Open the `.dmg` file
 2. Drag "Daily Status Log" to Applications
 3. Open from Applications (right-click → Open on first launch)
