@@ -1,0 +1,63 @@
+import { useState, useEffect, useCallback } from "react";
+import "./App.css";
+import { EntryForm } from "./components/EntryForm";
+import { EntryList } from "./components/EntryList";
+import { StandupReport } from "./components/StandupReport";
+import { Settings } from "./components/Settings";
+import { getEntries, Entry } from "./lib/tauri";
+
+function App() {
+  const [entries, setEntries] = useState<Entry[]>([]);
+  const [showStandup, setShowStandup] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const loadEntries = useCallback(async () => {
+    try {
+      const loaded = await getEntries();
+      setEntries(loaded);
+    } catch (error) {
+      console.error("Failed to load entries:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadEntries();
+  }, [loadEntries]);
+
+  return (
+    <main className="app">
+      <header className="app-header">
+        <h1>Daily Status Log</h1>
+        <button className="settings-btn" onClick={() => setShowSettings(true)}>
+          Settings
+        </button>
+      </header>
+
+      <div className="app-actions">
+        <EntryForm onEntryCreated={loadEntries} />
+        <button className="standup-btn" onClick={() => setShowStandup(true)}>
+          Generate Standup
+        </button>
+      </div>
+
+      <div className="app-content">
+        {isLoading ? (
+          <p className="loading">Loading entries...</p>
+        ) : (
+          <EntryList entries={entries} onEntryDeleted={loadEntries} />
+        )}
+      </div>
+
+      {showStandup && (
+        <StandupReport onClose={() => setShowStandup(false)} />
+      )}
+
+      {showSettings && <Settings onClose={() => setShowSettings(false)} />}
+    </main>
+  );
+}
+
+export default App;

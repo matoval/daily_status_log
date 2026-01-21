@@ -1,0 +1,537 @@
+:root {
+  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #0f0f0f;
+  background-color: #f6f6f6;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.app {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1rem;
+  min-height: 100vh;
+}
+
+/* Header */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #ddd;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.settings-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  background: #fff;
+  cursor: pointer;
+}
+
+.settings-btn:hover {
+  background: #f0f0f0;
+}
+
+/* Actions */
+.app-actions {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.new-entry-btn,
+.standup-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.new-entry-btn {
+  background: #2563eb;
+  color: white;
+}
+
+.new-entry-btn:hover {
+  background: #1d4ed8;
+}
+
+.standup-btn {
+  background: #059669;
+  color: white;
+}
+
+.standup-btn:hover {
+  background: #047857;
+}
+
+/* Entry Form */
+.entry-form {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1.5rem;
+}
+
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.form-header h3 {
+  margin: 0;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.form-group textarea,
+.form-group input[type="text"] {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.form-group textarea:focus,
+.form-group input:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+.task-input {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.task-input input {
+  flex: 1;
+}
+
+.task-input button {
+  padding: 0.75rem 1rem;
+  background: #e5e7eb;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.task-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+}
+
+.task-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: #f9fafb;
+  border-radius: 4px;
+  margin-bottom: 0.25rem;
+}
+
+.task-list li.completed span {
+  text-decoration: line-through;
+  color: #6b7280;
+}
+
+.task-list li span {
+  flex: 1;
+}
+
+.remove-btn {
+  background: none;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.form-actions button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+.form-actions button[type="submit"] {
+  background: #2563eb;
+  color: white;
+}
+
+.form-actions button[type="button"] {
+  background: #e5e7eb;
+}
+
+/* Entry List */
+.entry-list {
+  margin-top: 1rem;
+}
+
+.entry-list section {
+  margin-bottom: 2rem;
+}
+
+.entry-list h3 {
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
+  color: #374151;
+}
+
+.date-group {
+  margin-bottom: 1rem;
+}
+
+.date-header {
+  font-weight: 500;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.entry-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
+
+.entry-card:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.entry-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.entry-time {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.entry-summary {
+  flex: 1;
+}
+
+.task-count {
+  background: #e5e7eb;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+}
+
+.delete-btn:hover {
+  color: #ef4444;
+}
+
+.entry-details {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.entry-content {
+  margin: 0 0 1rem;
+  color: #374151;
+}
+
+.entry-tasks {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+}
+
+.entry-tasks li {
+  padding: 0.25rem 0;
+  font-family: monospace;
+}
+
+.entry-tasks li.completed {
+  color: #6b7280;
+}
+
+.entry-blockers {
+  background: #fef3c7;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.no-entries {
+  text-align: center;
+  color: #6b7280;
+  padding: 3rem;
+}
+
+.loading {
+  text-align: center;
+  color: #6b7280;
+  padding: 2rem;
+}
+
+/* Modals */
+.standup-modal,
+.settings-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.standup-content,
+.settings-content {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.standup-header,
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.standup-header h2,
+.settings-header h2 {
+  margin: 0;
+}
+
+.standup-info {
+  color: #6b7280;
+  margin-bottom: 1rem;
+}
+
+.standup-editor {
+  width: 100%;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-family: monospace;
+  font-size: 0.9rem;
+  resize: vertical;
+}
+
+.standup-actions,
+.settings-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.standup-actions button,
+.settings-actions button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+.standup-actions button.primary,
+.settings-actions button.primary {
+  background: #2563eb;
+  color: white;
+}
+
+.copied-message {
+  color: #059669;
+  font-weight: 500;
+}
+
+.error {
+  color: #ef4444;
+  margin: 0.5rem 0;
+}
+
+/* Settings Form */
+.settings-form {
+  margin: 1rem 0;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.settings-form select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.time-picker {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.time-picker select {
+  width: auto;
+  min-width: 4rem;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.time-separator {
+  font-size: 1.25rem;
+  font-weight: bold;
+  padding: 0 0.25rem;
+}
+
+.settings-form input:disabled,
+.settings-form select:disabled,
+.time-picker select:disabled {
+  background: #f3f4f6;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color: #f6f6f6;
+    background-color: #1a1a1a;
+  }
+
+  .app-header {
+    border-bottom-color: #333;
+  }
+
+  .settings-btn {
+    background: #2a2a2a;
+    border-color: #444;
+    color: #f6f6f6;
+  }
+
+  .settings-btn:hover {
+    background: #333;
+  }
+
+  .entry-form,
+  .entry-card,
+  .standup-content,
+  .settings-content {
+    background: #2a2a2a;
+  }
+
+  .form-group textarea,
+  .form-group input[type="text"],
+  .standup-editor,
+  .settings-form select,
+  .time-picker select {
+    background: #333;
+    border-color: #444;
+    color: #f6f6f6;
+  }
+
+  .time-separator {
+    color: #f6f6f6;
+  }
+
+  .time-picker select:disabled {
+    background: #2a2a2a;
+  }
+
+  .task-list li {
+    background: #333;
+  }
+
+  .task-input button,
+  .form-actions button[type="button"] {
+    background: #444;
+    color: #f6f6f6;
+  }
+
+  .entry-details {
+    border-top-color: #444;
+  }
+
+  .entry-blockers {
+    background: #4a3c00;
+  }
+
+  .date-header,
+  .entry-time {
+    color: #9ca3af;
+  }
+
+  .task-count {
+    background: #444;
+  }
+}
