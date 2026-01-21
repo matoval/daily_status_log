@@ -13,15 +13,16 @@ interface StandupReportProps {
 export function StandupReport({ onClose }: StandupReportProps) {
   const [report, setReport] = useState<StandupReportType | null>(null);
   const [content, setContent] = useState("");
+  const [format, setFormat] = useState("markdown");
   const [isLoading, setIsLoading] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const loadReport = async () => {
+  const loadReport = async (selectedFormat?: string) => {
     setIsLoading(true);
     setError(null);
     try {
-      const generated = await generateStandup();
+      const generated = await generateStandup(selectedFormat || format);
       setReport(generated);
       setContent(generated.content);
     } catch (err) {
@@ -29,6 +30,13 @@ export function StandupReport({ onClose }: StandupReportProps) {
       console.error(err);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleFormatChange = (newFormat: string) => {
+    setFormat(newFormat);
+    if (report) {
+      loadReport(newFormat);
     }
   };
 
@@ -66,8 +74,20 @@ export function StandupReport({ onClose }: StandupReportProps) {
             Generate a standup report from your entries since your last shared
             standup.
           </p>
+          <div className="form-group">
+            <label htmlFor="format-select">Format</label>
+            <select
+              id="format-select"
+              value={format}
+              onChange={(e) => setFormat(e.target.value)}
+            >
+              <option value="markdown">Markdown</option>
+              <option value="plain">Plain Text</option>
+              <option value="slack">Slack-friendly</option>
+            </select>
+          </div>
           <div className="standup-actions">
-            <button onClick={loadReport}>Generate Report</button>
+            <button onClick={() => loadReport()}>Generate Report</button>
             <button onClick={onClose}>Cancel</button>
           </div>
         </div>
@@ -95,6 +115,15 @@ export function StandupReport({ onClose }: StandupReportProps) {
               <span>
                 {report.entries.length} entries since last standup
               </span>
+              <select
+                className="format-select"
+                value={format}
+                onChange={(e) => handleFormatChange(e.target.value)}
+              >
+                <option value="markdown">Markdown</option>
+                <option value="plain">Plain Text</option>
+                <option value="slack">Slack-friendly</option>
+              </select>
             </div>
 
             <textarea

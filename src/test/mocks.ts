@@ -35,6 +35,8 @@ export const mockSettings: Settings = {
   reminder_enabled: true,
   reminder_time: "09:00",
   standup_format: "markdown",
+  ai_enabled: false,
+  ollama_model: "qwen2.5:1.5b",
 };
 
 export const mockStandupReport: StandupReport = {
@@ -71,6 +73,14 @@ export function setupTauriMocks() {
         return Promise.resolve(undefined);
       case "mark_standup_shared":
         return Promise.resolve(true);
+      case "export_entries":
+        return Promise.resolve("[]");
+      case "search_entries":
+        return Promise.resolve([mockEntry]);
+      case "check_ollama_status":
+        return Promise.resolve({ available: false, models: [] });
+      case "chat_with_ai":
+        return Promise.resolve("This is a mock AI response.");
       default:
         return Promise.reject(new Error(`Unknown command: ${cmd}`));
     }

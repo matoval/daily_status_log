@@ -41,7 +41,7 @@ describe("StandupReport", () => {
     await user.click(screen.getByText("Generate Report"));
 
     await waitFor(() => {
-      expect(mockInvoke).toHaveBeenCalledWith("generate_standup");
+      expect(mockInvoke).toHaveBeenCalledWith("generate_standup", { format: "markdown" });
     });
   });
 

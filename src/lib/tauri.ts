@@ -20,6 +20,8 @@ export interface Settings {
   reminder_enabled: boolean;
   reminder_time: string;
   standup_format: string;
+  ai_enabled: boolean;
+  ollama_model: string;
 }
 
 export interface StandupReport {
@@ -52,8 +54,8 @@ export async function deleteEntry(id: string): Promise<boolean> {
   return invoke("delete_entry", { id });
 }
 
-export async function generateStandup(): Promise<StandupReport> {
-  return invoke("generate_standup");
+export async function generateStandup(format?: string): Promise<StandupReport> {
+  return invoke("generate_standup", { format });
 }
 
 export async function saveStandup(

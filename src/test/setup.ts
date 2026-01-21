@@ -16,4 +16,4 @@ vi.mock("@tauri-apps/plugin-clipboard-manager", () => ({
 }));
 
 // Mock window.confirm
-global.confirm = vi.fn(() => true);
+(globalThis as typeof globalThis & { confirm: typeof confirm }).confirm = vi.fn(() => true);

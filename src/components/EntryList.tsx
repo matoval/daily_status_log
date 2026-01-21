@@ -4,9 +4,10 @@ import { Entry, deleteEntry } from "../lib/tauri";
 interface EntryListProps {
   entries: Entry[];
   onEntryDeleted: () => void;
+  isSearchMode?: boolean;
 }
 
-export function EntryList({ entries, onEntryDeleted }: EntryListProps) {
+export function EntryList({ entries, onEntryDeleted, isSearchMode = false }: EntryListProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const formatDate = (dateStr: string) => {
@@ -108,6 +109,41 @@ export function EntryList({ entries, onEntryDeleted }: EntryListProps) {
       </div>
     );
   };
+
+  // In search mode, group all entries by date
+  const allEntriesByDate = entries.reduce(
+    (acc, entry) => {
+      if (!acc[entry.date]) {
+        acc[entry.date] = [];
+      }
+      acc[entry.date].push(entry);
+      return acc;
+    },
+    {} as Record<string, Entry[]>
+  );
+
+  if (isSearchMode) {
+    return (
+      <div className="entry-list search-mode">
+        {Object.keys(allEntriesByDate).length > 0 ? (
+          <section className="search-results-section">
+            {Object.entries(allEntriesByDate)
+              .sort(([a], [b]) => b.localeCompare(a))
+              .map(([date, dateEntries]) => (
+                <div key={date} className="date-group">
+                  <div className="date-header">
+                    {formatDate(date)} ({dateEntries.length} entries)
+                  </div>
+                  {dateEntries.map(renderEntry)}
+                </div>
+              ))}
+          </section>
+        ) : (
+          <p className="no-entries">No entries match your search criteria.</p>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="entry-list">

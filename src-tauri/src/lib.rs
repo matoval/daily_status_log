@@ -1,5 +1,7 @@
 mod commands;
+mod export;
 mod models;
+mod ollama;
 mod scheduler;
 mod storage;
 
@@ -17,11 +19,17 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_clipboard_manager::init())
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_shell::init())
         .setup(|app| {
             // Initialize database
             let app_data_dir = app.path().app_data_dir().expect("Failed to get app data dir");
             let db = Database::new(app_data_dir).expect("Failed to initialize database");
             app.manage(db);
+
+            // Start the bundled Ollama server
+            ollama::start_ollama_server(app.handle());
 
             // Create system tray
             let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
@@ -81,7 +89,16 @@ pub fn run() {
             commands::mark_standup_shared,
             commands::get_settings,
             commands::update_settings,
+            commands::export_entries,
+            commands::search_entries,
+            commands::check_ollama_status,
+            commands::chat_with_ai,
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application")
+        .run(|_app_handle, event| {
+            if let tauri::RunEvent::Exit = event {
+                ollama::stop_ollama_server();
+            }
+        });
 }

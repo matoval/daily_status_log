@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Settings as SettingsType, getSettings, updateSettings } from "../lib/tauri";
+import { checkOllamaStatus, OllamaStatus } from "../lib/ollama";
 
 interface SettingsProps {
   onClose: () => void;
@@ -7,12 +8,14 @@ interface SettingsProps {
 
 export function Settings({ onClose }: SettingsProps) {
   const [settings, setSettings] = useState<SettingsType | null>(null);
+  const [ollamaStatus, setOllamaStatus] = useState<OllamaStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadSettings();
+    loadOllamaStatus();
   }, []);
 
   const loadSettings = async () => {
@@ -24,6 +27,16 @@ export function Settings({ onClose }: SettingsProps) {
       console.error(err);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const loadOllamaStatus = async () => {
+    try {
+      const status = await checkOllamaStatus();
+      setOllamaStatus(status);
+    } catch (err) {
+      console.error("Failed to check Ollama status:", err);
+      setOllamaStatus({ available: false, models: [] });
     }
   };
 
@@ -139,6 +152,60 @@ export function Settings({ onClose }: SettingsProps) {
               <option value="plain">Plain text</option>
               <option value="slack">Slack-friendly</option>
             </select>
+          </div>
+
+          <div className="settings-divider" />
+
+          <h3>AI Chat (Ollama)</h3>
+
+          <div className="form-group">
+            <div className="ollama-status">
+              <span className={`status-indicator ${ollamaStatus?.available ? "available" : "unavailable"}`} />
+              <span>
+                {ollamaStatus === null
+                  ? "Checking Ollama status..."
+                  : ollamaStatus.available
+                    ? "Ollama is running"
+                    : "Ollama is not available"}
+              </span>
+              <button
+                type="button"
+                className="refresh-btn"
+                onClick={loadOllamaStatus}
+              >
+                Refresh
+              </button>
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="ollama-model">Ollama Model</label>
+            {ollamaStatus?.models && ollamaStatus.models.length > 0 ? (
+              <select
+                id="ollama-model"
+                value={settings.ollama_model}
+                onChange={(e) =>
+                  setSettings({ ...settings, ollama_model: e.target.value })
+                }
+              >
+                {ollamaStatus.models.map((model) => (
+                  <option key={model} value={model}>
+                    {model}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input
+                id="ollama-model"
+                type="text"
+                value={settings.ollama_model}
+                onChange={(e) =>
+                  setSettings({ ...settings, ollama_model: e.target.value })
+                }
+                placeholder="llama3.2"
+              />
+            )}
+            <p className="form-hint">Model used for AI Chat feature</p>
           </div>
         </div>
 

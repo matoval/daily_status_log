@@ -33,6 +33,8 @@ pub struct Settings {
     pub reminder_enabled: bool,
     pub reminder_time: String, // HH:MM format
     pub standup_format: String,
+    pub ai_enabled: bool,
+    pub ollama_model: String,
 }
 
 impl Default for Settings {
@@ -41,6 +43,8 @@ impl Default for Settings {
             reminder_enabled: true,
             reminder_time: "09:00".to_string(),
             standup_format: "markdown".to_string(),
+            ai_enabled: false,
+            ollama_model: "qwen2.5:1.5b".to_string(),
         }
     }
 }

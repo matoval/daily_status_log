@@ -164,6 +164,8 @@ describe("Settings", () => {
           reminder_enabled: false,
           reminder_time: "09:00",
           standup_format: "slack",
+          ai_enabled: false,
+          ollama_model: "qwen2.5:1.5b",
         },
       });
     });

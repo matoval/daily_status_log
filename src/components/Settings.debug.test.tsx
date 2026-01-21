@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Settings } from "./Settings";
-import { setupTauriMocks, resetTauriMocks, mockSettings, mockInvoke } from "../test/mocks";
+import { setupTauriMocks, resetTauriMocks, mockInvoke } from "../test/mocks";
 
 describe("Settings - Debug Tests", () => {
   beforeEach(() => {

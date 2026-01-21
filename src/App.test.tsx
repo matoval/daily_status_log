@@ -1,8 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import App from "./App";
-import { setupTauriMocks, resetTauriMocks, mockEntry, mockInvoke } from "./test/mocks";
+import { setupTauriMocks, resetTauriMocks, mockInvoke } from "./test/mocks";
 
 describe("App", () => {
   beforeEach(() => {
@@ -28,10 +28,10 @@ describe("App", () => {
     expect(screen.getByText("+ New Entry")).toBeInTheDocument();
   });
 
-  it("shows generate standup button", () => {
+  it("shows AI chat button", () => {
     render(<App />);
 
-    expect(screen.getByText("Generate Standup")).toBeInTheDocument();
+    expect(screen.getByText("AI Chat")).toBeInTheDocument();
   });
 
   it("loads entries on mount", async () => {
@@ -87,31 +87,31 @@ describe("App", () => {
     });
   });
 
-  it("opens standup modal when clicking generate standup button", async () => {
+  it("opens chat panel when clicking AI Chat button", async () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await user.click(screen.getByText("Generate Standup"));
+    await user.click(screen.getByText("AI Chat"));
 
     await waitFor(() => {
-      expect(screen.getByText("Generate Standup Report")).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: "AI Chat" })).toBeInTheDocument();
     });
   });
 
-  it("closes standup modal", async () => {
+  it("closes chat panel when clicking Close Chat button", async () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await user.click(screen.getByText("Generate Standup"));
+    await user.click(screen.getByText("AI Chat"));
 
     await waitFor(() => {
-      expect(screen.getByText("Generate Standup Report")).toBeInTheDocument();
+      expect(screen.getByText("Close Chat")).toBeInTheDocument();
     });
 
-    await user.click(screen.getByText("Cancel"));
+    await user.click(screen.getByText("Close Chat"));
 
     await waitFor(() => {
-      expect(screen.queryByText("Generate Standup Report")).not.toBeInTheDocument();
+      expect(screen.queryByRole("heading", { name: "AI Chat" })).not.toBeInTheDocument();
     });
   });
 

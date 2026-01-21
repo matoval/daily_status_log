@@ -203,6 +203,8 @@ impl Database {
                 "reminder_enabled" => settings.reminder_enabled = value == "true",
                 "reminder_time" => settings.reminder_time = value,
                 "standup_format" => settings.standup_format = value,
+                "ai_enabled" => settings.ai_enabled = value == "true",
+                "ollama_model" => settings.ollama_model = value,
                 _ => {}
             }
         }
@@ -224,6 +226,14 @@ impl Database {
         conn.execute(
             "INSERT OR REPLACE INTO settings (key, value) VALUES ('standup_format', ?1)",
             params![settings.standup_format],
+        )?;
+        conn.execute(
+            "INSERT OR REPLACE INTO settings (key, value) VALUES ('ai_enabled', ?1)",
+            params![settings.ai_enabled.to_string()],
+        )?;
+        conn.execute(
+            "INSERT OR REPLACE INTO settings (key, value) VALUES ('ollama_model', ?1)",
+            params![settings.ollama_model],
         )?;
 
         Ok(())
@@ -262,6 +272,81 @@ impl Database {
             blockers,
             synced_at,
         }
+    }
+
+    pub fn search_entries(
+        &self,
+        from_date: Option<NaiveDate>,
+        to_date: Option<NaiveDate>,
+        query: Option<&str>,
+        completed_only: bool,
+        in_progress_only: bool,
+        has_blockers: bool,
+    ) -> Result<Vec<Entry>> {
+        let conn = self.conn.lock().unwrap();
+        let mut entries = Vec::new();
+
+        // Build the base query
+        let mut sql = String::from(
+            "SELECT id, created_at, date, content, tasks, blockers, synced_at FROM entries WHERE 1=1"
+        );
+        let mut params_vec: Vec<String> = Vec::new();
+
+        if let Some(from) = from_date {
+            sql.push_str(&format!(" AND date >= ?{}", params_vec.len() + 1));
+            params_vec.push(from.to_string());
+        }
+
+        if let Some(to) = to_date {
+            sql.push_str(&format!(" AND date <= ?{}", params_vec.len() + 1));
+            params_vec.push(to.to_string());
+        }
+
+        if let Some(q) = query {
+            if !q.trim().is_empty() {
+                sql.push_str(&format!(" AND (content LIKE ?{} OR tasks LIKE ?{})", params_vec.len() + 1, params_vec.len() + 2));
+                let like_pattern = format!("%{}%", q);
+                params_vec.push(like_pattern.clone());
+                params_vec.push(like_pattern);
+            }
+        }
+
+        if has_blockers {
+            sql.push_str(" AND blockers IS NOT NULL AND blockers != ''");
+        }
+
+        sql.push_str(" ORDER BY date DESC, created_at DESC");
+
+        let mut stmt = conn.prepare(&sql)?;
+        let params_refs: Vec<&dyn rusqlite::ToSql> = params_vec
+            .iter()
+            .map(|s| s as &dyn rusqlite::ToSql)
+            .collect();
+
+        let rows = stmt.query_map(params_refs.as_slice(), |row| Ok(Self::row_to_entry(row)))?;
+
+        for row in rows {
+            let entry = row?;
+
+            // Apply task filters in memory (can't easily do JSON filtering in SQLite)
+            if completed_only {
+                let all_completed = entry.tasks.iter().all(|t| t.completed);
+                if !all_completed || entry.tasks.is_empty() {
+                    continue;
+                }
+            }
+
+            if in_progress_only {
+                let has_incomplete = entry.tasks.iter().any(|t| !t.completed);
+                if !has_incomplete {
+                    continue;
+                }
+            }
+
+            entries.push(entry);
+        }
+
+        Ok(entries)
     }
 
     fn row_to_standup(row: &rusqlite::Row) -> Standup {
