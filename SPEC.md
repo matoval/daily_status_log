@@ -179,10 +179,12 @@ Guidelines:
 - [x] Entry search with date range and text filtering
 - [x] Multiple standup formats (Markdown, Slack, plain text)
 
-### Phase 3: Sync & Multi-Platform
-- [ ] Remote sync server
+### Phase 3: Sync & Multi-Platform - IN PROGRESS
+- [x] Remote sync server (Rust + Axum + PostgreSQL)
+- [x] Docker deployment (Dockerfile + docker-compose.yml)
+- [x] Multi-device sync with automatic sync on startup and entry creation
+- [x] Toast notifications for sync status
 - [ ] macOS build
-- [ ] Multi-device sync
 
 ## File Structure
 
@@ -210,10 +212,11 @@ daily-status-log/
 │   │   ├── EntryForm.tsx   # Form to create entries with tasks
 │   │   ├── EntryList.tsx   # Display entries grouped by date
 │   │   ├── StandupReport.tsx # Generate & copy standup reports
-│   │   ├── Settings.tsx    # App settings modal
+│   │   ├── Settings.tsx    # App settings modal (includes sync config)
 │   │   ├── Chat.tsx        # AI chat panel
 │   │   ├── ExportModal.tsx # Export UI with format selection
-│   │   └── EntrySearch.tsx # Search/filter UI
+│   │   ├── EntrySearch.tsx # Search/filter UI
+│   │   └── Toast.tsx       # Toast notifications for sync status
 │   ├── lib/
 │   │   ├── tauri.ts        # TypeScript wrappers for Tauri commands
 │   │   ├── ollama.ts       # Ollama status and chat functions
@@ -222,9 +225,13 @@ daily-status-log/
 │   ├── App.tsx
 │   ├── App.css
 │   └── main.tsx
-├── server/                 # Optional sync server (Phase 3)
+├── server/                 # Remote sync server
 │   ├── src/
-│   └── Cargo.toml
+│   │   └── main.rs         # Axum REST API server
+│   ├── Cargo.toml
+│   ├── Dockerfile          # Multi-stage Rust build
+│   ├── docker-compose.yml  # Server + PostgreSQL deployment
+│   └── .env.example        # Environment variables template
 ├── package.json
 ├── tsconfig.json
 └── SPEC.md
@@ -245,10 +252,24 @@ daily-status-log/
 - RAM: 2-4GB recommended for 1.5B model
 - Dedicated port 11435 to avoid conflicts
 
-### Sync Server (Optional)
-- Rust + Axum/Actix
-- PostgreSQL
-- Docker for deployment
+### Sync Server
+- Rust + Axum REST API
+- PostgreSQL database
+- Docker deployment with docker-compose
+- API key authentication (per-user keys, min 16 characters)
+- Endpoints: GET/POST /api/entries, POST /api/entries/bulk, DELETE /api/entries/{id}
+- Default port: 21435
+
+**Deployment:**
+```bash
+cd server
+docker compose up -d
+```
+
+**Environment Variables:**
+- `DATABASE_URL`: PostgreSQL connection string
+- `PORT`: Server port (default: 21435)
+- `RUST_LOG`: Log level
 
 ## Configuration
 
@@ -260,7 +281,10 @@ Settings are stored in SQLite and managed via the Settings UI:
   "reminder_time": "17:00",
   "standup_format": "markdown",
   "ai_enabled": false,
-  "ollama_model": "qwen2.5:1.5b"
+  "ollama_model": "qwen2.5:1.5b",
+  "sync_enabled": false,
+  "sync_url": "",
+  "sync_api_key": ""
 }
 ```
 
@@ -269,6 +293,9 @@ Settings are stored in SQLite and managed via the Settings UI:
 - **standup_format**: Default format for standups (markdown, plain, slack)
 - **ai_enabled**: Reserved for future use
 - **ollama_model**: AI model for chat (auto-pulled if not available)
+- **sync_enabled**: Enable remote sync to self-hosted server
+- **sync_url**: URL of sync server (e.g., http://192.168.1.3:21435)
+- **sync_api_key**: API key for authentication (min 16 characters)
 
 ## Security Considerations
 
