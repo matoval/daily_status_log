@@ -28,9 +28,9 @@ WORKDIR /app
 
 COPY --from=builder /app/target/release/daily-status-log-server /app/server
 
-ENV PORT=8080
+ENV PORT=21435
 ENV DATABASE_URL=postgres://postgres:postgres@db:5432/daily_status_log
 
-EXPOSE 8080
+EXPOSE 21435
 
 CMD ["/app/server"]

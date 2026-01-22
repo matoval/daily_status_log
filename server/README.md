@@ -7,15 +7,29 @@ A self-hosted sync server for Daily Status Log. Enables multi-device sync of you
 ### Using Docker Compose (Recommended)
 
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/daily-status-log.git
-cd daily-status-log/server
+# Create a directory for the server
+mkdir daily-status-log-server && cd daily-status-log-server
+
+# Download docker-compose.yml
+curl -O https://raw.githubusercontent.com/matoval/daily_status_log/main/server/docker-compose.yml
 
 # Start the server
 docker compose up -d
 ```
 
 The server will be available at `http://your-server:21435`.
+
+### Docker Image
+
+The server is published to GitHub Container Registry:
+
+```bash
+docker pull ghcr.io/matoval/daily-status-log-server:latest
+```
+
+Available tags:
+- `latest` - Latest release
+- `v0.1.0` - Specific version
 
 ### Environment Variables
 
@@ -104,8 +118,8 @@ docker compose logs -f server
 ## Updating
 
 ```bash
-git pull
-docker compose up -d --build
+docker compose pull
+docker compose up -d
 ```
 
 ## Troubleshooting

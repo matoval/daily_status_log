@@ -1,6 +1,8 @@
 services:
   server:
-    build: .
+    image: ghcr.io/matoval/daily-status-log-server:latest
+    # To build locally instead of using published image, comment above and uncomment:
+    # build: .
     ports:
       - "21435:21435"
     environment:
