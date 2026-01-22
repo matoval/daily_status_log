@@ -15,5 +15,20 @@ vi.mock("@tauri-apps/plugin-clipboard-manager", () => ({
   writeText: mockWriteText,
 }));
 
+// Mock Tauri updater plugin
+vi.mock("@tauri-apps/plugin-updater", () => ({
+  check: vi.fn().mockResolvedValue(null),
+}));
+
+// Mock Tauri process plugin
+vi.mock("@tauri-apps/plugin-process", () => ({
+  relaunch: vi.fn().mockResolvedValue(undefined),
+}));
+
+// Mock Tauri dialog plugin
+vi.mock("@tauri-apps/plugin-dialog", () => ({
+  ask: vi.fn().mockResolvedValue(false),
+}));
+
 // Mock window.confirm
 (globalThis as typeof globalThis & { confirm: typeof confirm }).confirm = vi.fn(() => true);

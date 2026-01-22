@@ -34,6 +34,9 @@ jobs:
         run: npm ci
 
       - name: Build Tauri app
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         run: npm run tauri build -- --bundles deb,rpm
 
       - name: Upload Linux artifacts
@@ -42,7 +45,9 @@ jobs:
           name: linux-builds
           path: |
             src-tauri/target/release/bundle/deb/*.deb
+            src-tauri/target/release/bundle/deb/*.deb.sig
             src-tauri/target/release/bundle/rpm/*.rpm
+            src-tauri/target/release/bundle/rpm/*.rpm.sig
 
   build-macos:
     runs-on: macos-latest
@@ -65,16 +70,26 @@ jobs:
         run: npm ci
 
       - name: Build Tauri app (Apple Silicon)
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         run: npm run tauri build -- --target aarch64-apple-darwin --bundles dmg
 
       - name: Build Tauri app (Intel)
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         run: npm run tauri build -- --target x86_64-apple-darwin --bundles dmg
 
       - name: Upload macOS artifacts
         uses: actions/upload-artifact@v4
         with:
           name: macos-builds
-          path: src-tauri/target/*/release/bundle/dmg/*.dmg
+          path: |
+            src-tauri/target/*/release/bundle/dmg/*.dmg
+            src-tauri/target/*/release/bundle/dmg/*.dmg.sig
+            src-tauri/target/*/release/bundle/macos/*.app.tar.gz
+            src-tauri/target/*/release/bundle/macos/*.app.tar.gz.sig
 
   build-docker:
     runs-on: ubuntu-latest
@@ -158,6 +173,51 @@ jobs:
             echo "EOF" >> $GITHUB_OUTPUT
           fi
 
+      - name: Generate latest.json for updater
+        run: |
+          VERSION="${{ github.ref_name }}"
+          VERSION_NUM="${VERSION#v}"
+          REPO="${{ github.repository }}"
+          BASE_URL="https://github.com/${REPO}/releases/download/${VERSION}"
+          PUB_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+          # Read signatures
+          DARWIN_AARCH64_SIG=""
+          DARWIN_X86_64_SIG=""
+
+          if [ -f "artifacts/macos/macos/daily-status-log.app.tar.gz.sig" ]; then
+            DARWIN_AARCH64_SIG=$(cat artifacts/macos/macos/daily-status-log.app.tar.gz.sig 2>/dev/null || echo "")
+          fi
+
+          # Find signature files dynamically
+          for sig_file in artifacts/macos/**/*.app.tar.gz.sig; do
+            if [[ "$sig_file" == *"aarch64"* ]]; then
+              DARWIN_AARCH64_SIG=$(cat "$sig_file" 2>/dev/null || echo "")
+            elif [[ "$sig_file" == *"x86_64"* ]]; then
+              DARWIN_X86_64_SIG=$(cat "$sig_file" 2>/dev/null || echo "")
+            fi
+          done
+
+          cat > artifacts/latest.json << EOF
+          {
+            "version": "${VERSION_NUM}",
+            "notes": "See release notes at ${BASE_URL}",
+            "pub_date": "${PUB_DATE}",
+            "platforms": {
+              "darwin-aarch64": {
+                "signature": "${DARWIN_AARCH64_SIG}",
+                "url": "${BASE_URL}/daily-status-log_${VERSION_NUM}_aarch64.app.tar.gz"
+              },
+              "darwin-x86_64": {
+                "signature": "${DARWIN_X86_64_SIG}",
+                "url": "${BASE_URL}/daily-status-log_${VERSION_NUM}_x64.app.tar.gz"
+              }
+            }
+          }
+          EOF
+
+          cat artifacts/latest.json
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
@@ -166,5 +226,8 @@ jobs:
             artifacts/linux/**/*.deb
             artifacts/linux/**/*.rpm
             artifacts/macos/**/*.dmg
+            artifacts/macos/**/*.app.tar.gz
+            artifacts/macos/**/*.app.tar.gz.sig
+            artifacts/latest.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

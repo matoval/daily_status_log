@@ -6,6 +6,7 @@ import { Settings } from "./components/Settings";
 import { Chat } from "./components/Chat";
 import { Toast } from "./components/Toast";
 import { getEntries, getSettings, syncEntries, Entry, SyncResult } from "./lib/tauri";
+import { checkAndPromptForUpdate } from "./lib/updater";
 
 interface ToastMessage {
   id: number;
@@ -103,6 +104,7 @@ function App() {
   useEffect(() => {
     loadEntries();
     loadSyncSettingsAndSync();
+    checkAndPromptForUpdate();
   }, [loadEntries, loadSyncSettingsAndSync]);
 
   return (

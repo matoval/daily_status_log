@@ -37,6 +37,15 @@
     ],
     "externalBin": [
       "binaries/ollama"
-    ]
+    ],
+    "createUpdaterArtifacts": true
+  },
+  "plugins": {
+    "updater": {
+      "endpoints": [
+        "https://github.com/matoval/daily_status_log/releases/latest/download/latest.json"
+      ],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDFBMENGMTJCMzM3NUQyNzYKUldSMjBuVXpLL0VNR3MwcHdaNHFsMFZwK1daaTBZdXphU3VZYmxkT3BKM3BEQW42bzRPdjdCV1MK"
+    }
   }
 }
