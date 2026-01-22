@@ -15,11 +15,14 @@ A cross-platform desktop application for tracking daily work status with AI-powe
 
 ### Download
 
-| Platform | Download |
-|----------|----------|
-| Linux (deb) | [Daily.Status.Log_0.1.0_amd64.deb](https://github.com/matoval/daily_status_log/releases/download/v0.1.0/Daily.Status.Log_0.1.0_amd64.deb) |
-| Linux (RPM) | [Daily.Status.Log-0.1.0-1.x86_64.rpm](https://github.com/matoval/daily_status_log/releases/download/v0.1.0/Daily.Status.Log-0.1.0-1.x86_64.rpm) |
-| macOS (Apple Silicon) | [Daily.Status.Log_0.1.0_aarch64.dmg](https://github.com/matoval/daily_status_log/releases/download/v0.1.0/Daily.Status.Log_0.1.0_aarch64.dmg) |
+Download the latest release from the [Releases page](https://github.com/matoval/daily_status_log/releases).
+
+| Platform | File |
+|----------|------|
+| Linux (deb) | `Daily.Status.Log_*_amd64.deb` |
+| Linux (RPM) | `Daily.Status.Log-*-1.x86_64.rpm` |
+| macOS (Apple Silicon) | `Daily.Status.Log_*_aarch64.dmg` |
+| macOS (Intel) | `Daily.Status.Log_*_x64.dmg` |
 
 ### Install
 

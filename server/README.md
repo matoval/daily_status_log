@@ -29,7 +29,7 @@ docker pull ghcr.io/matoval/daily-status-log-server:latest
 
 Available tags:
 - `latest` - Latest release
-- `v0.1.0` - Specific version
+- `v0.2.0`, `v0.1.0` - Specific versions
 
 ### Environment Variables
 
