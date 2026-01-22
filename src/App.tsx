@@ -45,7 +45,9 @@ function App() {
 
   const performSync = useCallback(async (showNoChanges = false): Promise<void> => {
     try {
+      console.log("[Sync] Starting sync...");
       const result: SyncResult = await syncEntries();
+      console.log("[Sync] Result:", result);
 
       if (result.uploaded > 0 || result.downloaded > 0) {
         const messages = [];
@@ -61,11 +63,15 @@ function App() {
       }
 
       if (result.errors.length > 0) {
-        showToast(`Sync errors: ${result.errors.length}`, "error");
+        console.error("[Sync] Errors:", result.errors);
+        // Show first error message for more detail
+        const firstError = result.errors[0];
+        const shortError = firstError.length > 50 ? firstError.substring(0, 50) + "..." : firstError;
+        showToast(`Sync error: ${shortError}`, "error");
       }
     } catch (error) {
-      console.error("Sync failed:", error);
-      showToast("Sync failed", "error");
+      console.error("[Sync] Failed:", error);
+      showToast(`Sync failed: ${error}`, "error");
     }
   }, [showToast, loadEntries]);
 
